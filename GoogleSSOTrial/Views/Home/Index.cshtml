@@ -1,0 +1,62 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
+<a href="#" onclick="signOut();">Sign out</a>
+
+<pre id="userdata"></pre>
+
+
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<meta name="google-signin-client_id" content="985592675497-qtgq7fr3lv0hhp9c1qpmhvmkil8pbhog.apps.googleusercontent.com">
+
+<script>
+    function onSignIn(googleUser) {
+       
+        var profile = googleUser.getBasicProfile();
+        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+        console.log('Name: ' + profile.getName());
+        console.log('Image URL: ' + profile.getImageUrl());
+        console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log('Id Token: ' + id_token);
+
+
+
+        jQuery.ajax({
+            type: "POST",
+            url: "@Url.Action("SignInToken", "GoogleAuth")",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            data: JSON.stringify({ SignInToken: id_token }),
+            success: function (returnData) {
+             
+                $("#userdata").html(JSON.stringify(returnData, undefined, 2));
+            },
+            failure: function (errMsg) {
+                debugger
+                console.log(errorMsg)
+                $("#userdata").html(errorMsg);
+            }
+        });
+    }
+</script>
+
+
+<script>
+    function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+            $("#userdata").html('');
+            console.log('User signed out.');
+        });
+    }
+</script>
